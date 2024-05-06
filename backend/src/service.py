@@ -5,6 +5,7 @@ from typing import List
 
 import torch
 from diffusers import DPMSolverMultistepScheduler, StableDiffusionPipeline
+from fashion_clip.fashion_clip import FashionCLIP
 from transformers import CLIPModel
 from utils import get_current_date_str
 
@@ -14,6 +15,7 @@ HEIGHT = 512
 INFERENCE_STEP = 30
 
 gen_img_save_path = "../gen_images"
+gen_emb_save_path = "../gen_embeddings"
 
 
 def generate_image_from_prompt(user_id: int, prompt: str) -> List[str]:
@@ -47,3 +49,28 @@ def generate_image_from_prompt(user_id: int, prompt: str) -> List[str]:
         img_path_list.append(img_path)
 
     return img_path_list
+
+
+def __convert_imgpath_to_embpath(path: str) -> str:
+    date_dir = get_current_date_str()
+
+    filename = path.split("/")[-1]
+    filename = filename[:-4] + ".pth"
+    emb_path_dir = posixpath.join(gen_emb_save_path, date_dir)
+    os.makedirs(emb_path_dir, exist_ok=True)
+    emb_path = posixpath.join(emb_path_dir, filename)
+
+    return emb_path
+
+
+def generate_embedding_from_image(path_list: List[str]):
+    fclip = FashionCLIP("fashion-clip")
+
+    image_embeddings = fclip.encode_images(path_list, batch_size=4)
+
+    for image_embedding, path in zip(image_embeddings, path_list):
+        torch.save(image_embedding, __convert_imgpath_to_embpath(path))
+
+
+def recommend_item_from_seqimg():
+    pass

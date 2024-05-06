@@ -188,6 +188,8 @@ pyrightconfig.json
 
 .vscode
 backend/gen_images
+backend/gen_embeddings
 backend/model_ckpt
 backend/data
+backend/src/models
 *.json
