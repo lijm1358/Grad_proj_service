@@ -1,12 +1,14 @@
 from fastapi import APIRouter
 from schemas import ImageGen, Interact, Recommend
+from service import generate_image_from_prompt
 
 api_router = APIRouter()
 
 
 @api_router.post("/imagegen")
-async def generate_image(data: ImageGen):
-    print(data)
+def generate_image(data: ImageGen):
+    generate_image_from_prompt(data.user_id, data.prompt)
+
     return {
         "user_id": data.user_id,
         "prompt": data.prompt,
@@ -28,7 +30,7 @@ async def generate_image(data: ImageGen):
 
 
 @api_router.post("/recommend")
-async def recommend_item(data: Recommend):
+def recommend_item(data: Recommend):
     print(data)
     return {
         "user_id": data.user_id,
@@ -54,6 +56,6 @@ at the back of the heel to keep them in place.",
 
 
 @api_router.post("/interact")
-async def item_interact(data: Interact):
+def item_interact(data: Interact):
     print(data)
     return {"message": "Item interaction recorded"}
