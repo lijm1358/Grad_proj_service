@@ -11,6 +11,7 @@ empty1, con1, con2, con3, con4, con5, empty2 = st.columns([0.1, 0.4, 0.4, 0.4, 0
 empty1, con6, con7, con8, con9, con10, empty2 = st.columns([0.1, 0.4, 0.4, 0.4, 0.4, 0.4, 0.1])  # item6-10
 empty1, con11, empty2 = st.columns([0.1, 2.0, 0.1])  # empty limne
 empty1, con12, _, con13, empty2 = st.columns([0.1, 0.15, 1.6, 0.25, 0.1])  # two button
+empty1, con14, empty2 = st.columns([0.725, 0.15, 0.725])  # two button
 
 
 temp_data = {
@@ -21,6 +22,8 @@ temp_data = {
 
 
 def main():
+    if st.session_state.user_id == "":
+        st.switch_page("./app.py")
     with empty1:
         empty()
     # datas = {"image_id": st.session_state.img_select, "user_id": st.session_state.user_id}
@@ -74,9 +77,15 @@ def main():
             st.session_state.prompt = ""
             st.session_state.img_select = ""
             st.session_state.img_gen = 1
-            st.page_link(page="./app.py", label="처음으로", icon="🏠")
+            st.page_link(page="./pages/image.py", label="처음으로", icon="🏠")
         with con13:
             st.page_link(page="./pages/result.py", label="다음 페이지", icon="➡️")
+        with con14:
+            st.header("")
+            st.header("")
+
+            if st.button("Logout"):
+                st.switch_page("./app.py")
     with empty2:
         empty()
 
