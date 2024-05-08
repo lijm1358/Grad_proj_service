@@ -35,7 +35,7 @@ def generate_image(data: ImageGen, bucket: Annotated[Bucket, Depends(gcp_storage
         "user_id": data.user_id,
         "prompt": data.prompt,
         "images": [
-            {"image_id": image_id, "image_url": image_url} for image_id, image_url in zip(image_urls, image_ids)
+            {"image_id": image_id, "image_url": image_url} for image_id, image_url in zip(image_ids, image_urls)
         ],
     }
 
