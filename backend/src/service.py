@@ -137,6 +137,8 @@ def __get_modal_emb(tokens):
 
 
 def __select_data(idx, additional_emb):
+    # TODO: change idx retrieve method if idx can be other than integer
+    idx = int(idx)
     tokens = torch.tensor(test_data[idx] + [num_item], dtype=torch.long) + 1
     tokens = tokens[-model_args["max_len"] :]
     mask_len = model_args["max_len"] - len(tokens)
