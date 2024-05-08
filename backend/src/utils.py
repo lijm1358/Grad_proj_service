@@ -1,4 +1,5 @@
 import datetime
+import json
 import os
 
 from google.cloud import storage
@@ -25,3 +26,9 @@ def gcp_storage_upload(bucket: storage.Bucket, file_upload: str, dest_path: str)
     blob = bucket.blob(destination_blob_name)
 
     blob.upload_from_filename(source_file_name)
+
+
+def load_json(path):
+    with open(path, "r") as file:
+        data = json.load(file)
+    return data

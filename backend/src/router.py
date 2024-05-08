@@ -4,7 +4,12 @@ from typing import Annotated
 from fastapi import APIRouter, Depends
 from google.cloud.storage import Bucket
 from schemas import ImageGen, Interact, Recommend
-from service import generate_embedding_from_image, generate_image_from_prompt
+from service import (
+    article_id_to_info,
+    generate_embedding_from_image,
+    generate_image_from_prompt,
+    recommend_item_from_seqimg,
+)
 from utils import gcp_storage_conn, gcp_storage_upload
 
 api_router = APIRouter()
@@ -37,27 +42,14 @@ def generate_image(data: ImageGen, bucket: Annotated[Bucket, Depends(gcp_storage
 
 @api_router.post("/recommend")
 def recommend_item(data: Recommend):
-    print(data)
+    recommended_items_id = recommend_item_from_seqimg(data.user_id, data.image_id)
+
+    rec_results = [article_id_to_info(item_id) for item_id in recommended_items_id]
+
     return {
         "user_id": data.user_id,
         "image_id": data.image_id,
-        "rec_results": [
-            {
-                "item_id": "0108775015",
-                "prod_name": "Strap top",
-                "prod_type_name": "Vest top",
-                "detail_desc": "Womens Everyday Basics,1002,Jersey Basic,Jersey top with narrow shoulder straps.",
-                "image_link": "http://some.s3.link/0108775015.jpg",
-            },
-            {
-                "item_id": "0160442042",
-                "prod_name": "Sneaker 3p Socks",
-                "prod_type_name": "Socks",
-                "detail_desc": "Short, fine-knit socks designed to be hidden by your shoes with a silicone trim \
-at the back of the heel to keep them in place.",
-                "image_link": "http://some.s3.link/0160442042.jpg",
-            },
-        ],
+        "rec_results": rec_results,
     }
 
 
