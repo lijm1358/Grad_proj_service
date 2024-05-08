@@ -9,10 +9,13 @@ st.set_page_config(layout="wide")
 empty1, con0, empty2 = st.columns([0.1, 0.15, 0.1])
 empty1, con1, empty2 = st.columns([0.1, 0.3, 0.1])
 empty1, line, empty2 = st.columns([0.1, 0.3, 0.1])
-empty1, _, con2, empty2 = st.columns([0.2, 1.5, 0.2, 0.2])  # two button
+empty1, _, con2, empty2 = st.columns([0.2, 1.5, 0.2, 0.2])
+empty1, con3, empty2 = st.columns([0.725, 0.15, 0.725])
 
 
 def main():
+    if st.session_state.user_id == "":
+        st.switch_page("./app.py")
     with empty1:
         empty()
     print(st.session_state.item_select)
@@ -27,14 +30,17 @@ def main():
         st.write(f"상품 분류 : {st.session_state.item_select['prod_type_name']}")
         st.write(f"상품 설명 : {st.session_state.item_select['detail_desc']}")
     with line:
-        st.write()
-        st.write()
-        st.write()
+        st.header("")
     with con2:
         st.session_state.prompt = ""
         st.session_state.img_select = ""
         st.session_state.img_gen = 1
-        st.page_link(page="./app.py", label="처음으로", icon="🏠")
+        st.page_link(page="./pages/image.py", label="처음으로", icon="🏠")
+    with con3:
+        st.header("")
+        st.header("")
+        if st.button("Logout"):
+            st.switch_page("./app.py")
     with empty2:
         empty()
 

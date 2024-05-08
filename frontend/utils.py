@@ -21,3 +21,11 @@ def show_item(item_info):
             st.markdown(f"상품 이름 : {item_info['prod_name']}")
             st.markdown(f"상품 분류 : {item_info['prod_type_name']}")
             st.markdown(f"상품 설명 : {item_info['detail_desc']}")
+
+
+def init_session_state():
+    st.session_state.prompt = ""
+    st.session_state.user_id = ""
+    st.session_state.img_select = ""
+    st.session_state.item_select = {}
+    st.session_state.img_gen = 1
