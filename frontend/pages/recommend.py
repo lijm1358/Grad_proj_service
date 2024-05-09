@@ -1,6 +1,6 @@
-# import os
+import os
 
-# import requests
+import requests
 import streamlit as st
 from pyparsing import empty
 from utils import show_item
@@ -26,22 +26,16 @@ def main():
         st.switch_page("./app.py")
     with empty1:
         empty()
-    # datas = {"image_id": st.session_state.img_select, "user_id": st.session_state.user_id}
-    rec_results = None
-    # response = requests.post(os.environ["url"] + "recommend", data=datas).json()
-    # if response.status_code == 200:
-    #     rec_results = response["rec_results"]
-    # else:
-    rec_results = [
-        {
-            "item_id": "0108775015" if i % 2 else "1234",
-            "prod_name": "Strap top",
-            "prod_type_name": "Vest top",
-            "detail_desc": "Womens Everyday Basics,1002,Jersey Basic,Jersey top with narrow shoulder straps.",
-            "image_link": ("https://bit.ly/3UO6Uey" if i % 4 == 0 else temp_data[i % 3]),
-        }
-        for i in range(10)
-    ]
+    if st.session_state.rec_results is None:
+        datas = {"image_id": st.session_state.img_select, "user_id": st.session_state.user_id}
+        rec_results = None
+        response = requests.post(os.environ["url"] + "/api/recommend", json=datas)
+        response_json = response.json()
+        if response.status_code == 200:
+            rec_results = response_json["rec_results"]
+            st.session_state.rec_results = rec_results
+    else:
+        rec_results = st.session_state.rec_results
 
     with con0:
         st.header(f"'{st.session_state.prompt}' 중 {st.session_state.user_id}님의 취향을 고려한 상품 😎")
@@ -67,7 +61,7 @@ def main():
         with con10:
             show_item(rec_results[9])
         with con11:
-            id_list = [item["item_id"] for item in rec_results]
+            id_list = [item["article_id"] for item in rec_results]
             select_id = st.selectbox(
                 "가장 마음에 드는 아이템을 선택하세요!",
                 id_list,

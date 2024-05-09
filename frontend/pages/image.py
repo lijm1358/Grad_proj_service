@@ -1,7 +1,6 @@
-# import os
-import time
+import os
 
-# import requests
+import requests
 import streamlit as st
 from pyparsing import empty
 from utils import show_img
@@ -29,33 +28,16 @@ def main():
     if len(st.session_state.prompt) > 0 and st.session_state.img_gen:
         with con2:
             st.write("이미지를 생성합니다.(최대 1분 소요)")
-        time.sleep(5)
-        # datas = {"prompt": st.session_state.prompt, "user_id": st.session_state.user_id}
-        # response = requests.post(os.environ["url"] + "imaggen", data=datas).json()
-        # if response.status_code == 200:
-        #     images = response["images"]
+        datas = {"user_id": st.session_state.user_id, "prompt": st.session_state.prompt}
+        response = requests.post(os.environ["url"] + "/api/imagegen", json=datas)
+        response_json = response.json()
+        if response.status_code == 200:
+            images = response_json["images"]
         st.session_state.img_gen = 0
-    if len(st.session_state.prompt) >= 5:
-        images = [
-            {"image_id": "img1", "image_url": "https://bit.ly/3JM8yqL"},
-            {
-                "image_id": "img2",
-                "image_url": "https://bit.ly/3JOlMTL",
-            },
-            {
-                "image_id": "img3",
-                "image_url": "https://bit.ly/4bI0xPB",
-            },
-        ]
-    elif 0 < len(st.session_state.prompt) < 5:
-        images = [
-            {
-                "image_id": "img2",
-                "image_url": "https://bit.ly/3wqL875",
-            }
-            for _ in range(3)
-        ]
-    elif len(st.session_state.prompt) == 0:
+        st.session_state.images = images
+    elif st.session_state.images is not None:
+        images = st.session_state.images
+    else:
         images = [
             {
                 "image_id": "no_img",
