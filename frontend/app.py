@@ -12,7 +12,7 @@ empty1, con2, empty2 = st.columns([0.2, 1.2, 0.2])  # text input
 empty1, con3, empty2 = st.columns([0.2, 1.2, 0.2])  # text input
 empty1, con4, empty2 = st.columns([0.2, 1.2, 0.2])  # text input
 
-sample_user = {"id": "123", "passward": "123"}
+sample_user = {"id": "123", "password": "123"}
 
 
 def main():
@@ -27,10 +27,10 @@ def main():
         st.header("Login")
     with con2:
         st.session_state.user_id = st.text_input("Username")
-        passward = st.text_input("Passward")
+        password = st.text_input("Password")
     with con3:
         if st.button("Login"):
-            if st.session_state.user_id == sample_user["id"] and passward == sample_user["passward"]:
+            if st.session_state.user_id == sample_user["id"] and password == sample_user["password"]:
                 st.switch_page("./pages/image.py")
     with empty2:
         empty()
