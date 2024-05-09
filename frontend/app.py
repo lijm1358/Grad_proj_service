@@ -2,6 +2,7 @@
 
 # import requests
 import streamlit as st
+from dotenv import load_dotenv
 from pyparsing import empty
 from utils import init_session_state
 
@@ -17,6 +18,8 @@ sample_user = {"id": "123", "passward": "123"}
 def main():
     init_session_state()
     print(st.session_state)
+
+    load_dotenv()
 
     with empty1:
         empty()
