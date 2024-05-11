@@ -19,13 +19,13 @@ def main():
     with empty1:
         empty()
     print(st.session_state.item_select)
-    # datas = {"image_id": st.session_state.item_select["item_id"], "user_id": st.session_state.user_id}
+    # datas = {"image_id": st.session_state.item_select["article_id"], "user_id": st.session_state.user_id}
     # response = requests.post(os.environ["url"] + "interacte", data=datas).json()
     # if response.status_code == 200:
     with con0:
-        show_img(st.session_state.item_select["item_id"], st.session_state.item_select["image_link"])
+        show_img(st.session_state.item_select["article_id"], st.session_state.item_select["image_link"])
     with con1:
-        st.write(f"상품 번호 : {st.session_state.item_select['item_id']}")
+        st.write(f"상품 번호 : {st.session_state.item_select['article_id']}")
         st.write(f"상품 이름 : {st.session_state.item_select['prod_name']}")
         st.write(f"상품 분류 : {st.session_state.item_select['prod_type_name']}")
         st.write(f"상품 설명 : {st.session_state.item_select['detail_desc']}")
