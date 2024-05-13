@@ -9,7 +9,6 @@ import pandas as pd
 import torch
 import yaml
 from diffusers import DPMSolverMultistepScheduler, StableDiffusionPipeline
-from dotenv import load_dotenv
 from fashion_clip.fashion_clip import FashionCLIP
 from models.mlpbert import MLPBERT4Rec
 from transformers import CLIPModel
@@ -19,8 +18,6 @@ BATCH_SIZE = 4
 WIDTH = 512
 HEIGHT = 512
 INFERENCE_STEP = 30
-
-load_dotenv("../.env")
 
 gen_img_save_path = os.environ["GEN_IMG_SAVE_PATH"]
 gen_emb_save_path = os.environ["GEN_EMB_SAVE_PATH"]
