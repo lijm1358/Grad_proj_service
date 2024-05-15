@@ -193,3 +193,6 @@ backend/model_ckpt
 backend/data
 backend/src/models
 *.json
+
+backend/src/migrations/versions/*
+!backend/src/migrations/versions/__init__.py
