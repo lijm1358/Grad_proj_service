@@ -68,8 +68,19 @@ def generate_image(
 
 
 @api_router.post("/recommend")
-def recommend_item(data: Recommend):
-    recommended_items_id = recommend_item_from_seqimg(data.user_id, data.image_id)
+def recommend_item(data: Recommend, db_session: Annotated[Session, Depends(get_session)]):
+    gen_img_row = db_session.get(LogImggen, data.image_id)
+    emb_url = gen_img_row.emb_location
+
+    recommended_items_id = recommend_item_from_seqimg(data.user_id, data.image_id, emb_url)
+
+    for rank, item_id in enumerate(recommended_items_id):
+        item_id_original = "0" + item_id
+        rec_request = LogRecommendation(
+            item_rank=rank + 1, item_id=item_id_original, request_log_id=gen_img_row.request_log_id
+        )
+        db_session.add(rec_request)
+    db_session.commit()
 
     rec_results = [article_id_to_info(item_id) for item_id in recommended_items_id]
 

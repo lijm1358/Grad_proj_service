@@ -152,15 +152,16 @@ def __select_data(idx, additional_emb):
     return tokens, img_emb
 
 
-# TODO: load embeddings not from image_id, load from database information about embedding path.
-def __load_img_embedding(image_id: str) -> torch.Tensor:
-    path = posixpath.join(os.environ["GEN_EMBEDDING_LOAD_PATH"], image_id + ".pth")
+def __load_img_embedding(emb_url: str) -> torch.Tensor:
+    path = "/".join(emb_url.split("/")[-2:])
+    path = posixpath.join(os.environ["GEN_EMBEDDING_LOAD_PATH"], path)
+
     emb = torch.load(path)
 
     return emb
 
 
-def recommend_item_from_seqimg(user_idx: int, image_id: str):
+def recommend_item_from_seqimg(user_idx: int, image_id: str, emb_url: str):
     model = MLPBERT4Rec(
         **model_args,
         num_item=num_item,
@@ -173,7 +174,7 @@ def recommend_item_from_seqimg(user_idx: int, image_id: str):
 
     model.eval()
 
-    chosen_item_emb = __load_img_embedding(image_id)
+    chosen_item_emb = __load_img_embedding(emb_url)
 
     tokens, modal_emb = __select_data(user_idx, chosen_item_emb)
     tokens = tokens.unsqueeze(0).to(device)
