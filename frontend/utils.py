@@ -31,3 +31,4 @@ def init_session_state():
     st.session_state.img_gen = 1
     st.session_state.images = None
     st.session_state.rec_results = None
+    st.session_state.req_id = ""

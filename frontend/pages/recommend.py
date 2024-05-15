@@ -34,6 +34,7 @@ def main():
         if response.status_code == 200:
             rec_results = response_json["rec_results"]
             st.session_state.rec_results = rec_results
+            st.session_state.req_id = response_json["related_request_id"]
     else:
         rec_results = st.session_state.rec_results
 
