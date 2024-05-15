@@ -107,8 +107,13 @@ def generate_embedding_from_image(path_list: List[str]):
 
     image_embeddings = fclip.encode_images(path_list, batch_size=4)
 
+    emb_path_list = []
     for image_embedding, path in zip(image_embeddings, path_list):
-        torch.save(image_embedding, __convert_imgpath_to_embpath(path))
+        emb_path = __convert_imgpath_to_embpath(path)
+        torch.save(image_embedding, emb_path)
+        emb_path_list.append(emb_path)
+
+    return emb_path_list
 
 
 def __get_modal_emb(tokens):
