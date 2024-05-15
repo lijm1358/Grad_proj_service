@@ -88,12 +88,23 @@ def recommend_item(data: Recommend, db_session: Annotated[Session, Depends(get_s
         "user_id": data.user_id,
         "image_id": data.image_id,
         "rec_results": rec_results,
+        "related_request_id": gen_img_row.request_log_id,
     }
 
 
 @api_router.post("/interact")
-def item_interact(data: Interact):
-    print(data)
+def item_interact(data: Interact, db_session: Annotated[Session, Depends(get_session)]):
+    item_id_original = "0" + data.item_id
+    interacted_user = db_session.exec(select(User).where(User.username == data.user_id)).one()
+
+    related_imggen_request = db_session.get(LogImggenRequest, data.related_req_id)
+
+    interaction_request = LogUserItemInteraction(
+        user=interacted_user, item_id=item_id_original, request_log=related_imggen_request
+    )
+    db_session.add(interaction_request)
+    db_session.commit()
+
     return {"message": "Item interaction recorded"}
 
 

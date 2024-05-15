@@ -53,6 +53,7 @@ class LogImggenRequest(SQLModel, table=True):
     user: "User" = Relationship(back_populates="imggen_requests")
     images: List["LogImggen"] = Relationship(back_populates="request_log")
     recommendations: List["LogRecommendation"] = Relationship(back_populates="request_log")
+    interactions: Optional["LogUserItemInteraction"] = Relationship(back_populates="request_log")
 
 
 class LogImggen(SQLModel, table=True):
@@ -73,15 +74,14 @@ class LogRecommendation(SQLModel, table=True):
 
     item: "Item" = Relationship(back_populates="recommendations")
     request_log: "LogImggenRequest" = Relationship(back_populates="recommendations")
-    interactions: Optional["LogUserItemInteraction"] = Relationship(back_populates="recommendation_log")
 
 
 class LogUserItemInteraction(SQLModel, table=True):
     user_id: int = Field(foreign_key="user.id", primary_key=True)
     item_id: str = Field(foreign_key="item.article_id")
-    recommendation_log_id: Optional[int] = Field(default=None, foreign_key="logrecommendation.id")
+    request_log_id: Optional[int] = Field(default=None, foreign_key="logimggenrequest.id")
     timestamp: datetime = Field(default_factory=datetime.now, primary_key=True)
 
     user: "User" = Relationship(back_populates="interactions")
     item: "Item" = Relationship(back_populates="interactions")
-    recommendation_log: Optional["LogRecommendation"] = Relationship(back_populates="interactions")
+    request_log: Optional["LogImggenRequest"] = Relationship(back_populates="interactions")
