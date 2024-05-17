@@ -72,7 +72,11 @@ def recommend_item(data: Recommend, db_session: Annotated[Session, Depends(get_s
     gen_img_row = db_session.get(LogImggen, data.image_id)
     emb_url = gen_img_row.emb_location
 
-    recommended_items_id = recommend_item_from_seqimg(data.user_id, data.image_id, emb_url)
+    user_db_id = db_session.exec(select(User).where(User.username == data.user_id)).one().id
+    user_seq = db_session.exec(select(LogUserItemInteraction).where(LogUserItemInteraction.user_id == user_db_id))
+    user_seq_ids = [seq.item_id for seq in user_seq]
+
+    recommended_items_id = recommend_item_from_seqimg(user_seq_ids, data.image_id, emb_url)
 
     for rank, item_id in enumerate(recommended_items_id):
         item_id_original = "0" + item_id

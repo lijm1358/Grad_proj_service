@@ -30,7 +30,6 @@ with open(setting_path) as file:
 
 path = "../data"
 metadata = load_json(f"{path}/metadata.json")
-test_data = torch.load(f"{path}/test_data.pt")  # item sequence per user
 item2idx = torch.load(f"{path}/item2idx.pt")  # mapping test_data's item idx to article id.
 idx2item = {k: v for v, k in item2idx.items()}
 idx_groups = torch.load(f"{path}/id_group_dict.pt")
@@ -138,10 +137,8 @@ def __get_modal_emb(tokens):
     return modal_emb
 
 
-def __select_data(idx, additional_emb):
-    # TODO: change idx retrieve method if idx can be other than integer
-    idx = int(idx)
-    tokens = torch.tensor(test_data[idx] + [num_item], dtype=torch.long) + 1
+def __select_data(idxs, additional_emb):
+    tokens = torch.tensor(idxs + [num_item], dtype=torch.long) + 1
     tokens = tokens[-model_args["max_len"] :]
     mask_len = model_args["max_len"] - len(tokens)
     tokens = torch.concat((torch.zeros(mask_len, dtype=torch.long), tokens), dim=0)
@@ -161,13 +158,18 @@ def __load_img_embedding(emb_url: str) -> torch.Tensor:
     return emb
 
 
-def recommend_item_from_seqimg(user_idx: int, image_id: str, emb_url: str):
+def recommend_item_from_seqimg(
+    user_seq: List[str],
+    image_id: str,
+    emb_url: str,
+):
     model = MLPBERT4Rec(
         **model_args,
         num_item=num_item,
         idx_groups=idx_groups,
         device=device,
     ).to(device)
+    user_seq_idx = [item2idx[int(seq[1:])] for seq in user_seq]  # remove '0' from string item id and cast to int
 
     model_ckpt_path = os.environ["RECOMMENDER_MODEL_CKPT_PATH"]
     model.load_state_dict(torch.load(model_ckpt_path))
@@ -176,7 +178,7 @@ def recommend_item_from_seqimg(user_idx: int, image_id: str, emb_url: str):
 
     chosen_item_emb = __load_img_embedding(emb_url)
 
-    tokens, modal_emb = __select_data(user_idx, chosen_item_emb)
+    tokens, modal_emb = __select_data(user_seq_idx, chosen_item_emb)
     tokens = tokens.unsqueeze(0).to(device)
     modal_emb = modal_emb.unsqueeze(0).to(device)
     labels = [0] * (model_args["max_len"] - 1) + [1]
