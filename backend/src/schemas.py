@@ -1,3 +1,5 @@
+from typing import Optional
+
 from pydantic import BaseModel
 
 # from models import Event
@@ -24,6 +26,7 @@ class Recommend(BaseModel):
 class Interact(BaseModel):
     user_id: str
     item_id: str
+    related_req_id: Optional[int]
 
     class Config:
-        json_schema_extra = {"example": {"user_id": "1234", "item_id": "0108775015"}}
+        json_schema_extra = {"example": {"user_id": "1234", "item_id": "0108775015", "related_req_id": 1}}
