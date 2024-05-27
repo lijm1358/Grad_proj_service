@@ -27,7 +27,11 @@ def main():
     with empty1:
         empty()
     if st.session_state.rec_results is None:
-        datas = {"image_id": st.session_state.img_select, "user_id": st.session_state.user_id}
+        datas = {
+            "image_id": st.session_state.img_select,
+            "user_id": st.session_state.user_id,
+            "prompt": st.session_state.prompt,
+        }
         rec_results = None
         response = requests.post(os.environ["url"] + "/api/recommend", json=datas)
         response_json = response.json()
