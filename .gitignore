@@ -196,3 +196,6 @@ backend/src/models
 
 backend/src/migrations/versions/*
 !backend/src/migrations/versions/__init__.py
+
+backend/logs
+backend/config
