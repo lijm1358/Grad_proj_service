@@ -80,21 +80,21 @@ def recommend_item(data: Recommend, db_session: Annotated[Session, Depends(get_s
 
     recommended_items_id, p_label = recommend_item_from_seqimg(user_seq_ids, data.image_id, emb_url, prompt_res)
 
-    for rank, item_id in enumerate(recommended_items_id):
-        item_id_original = "0" + item_id
-        rec_request = LogRecommendation(
-            item_rank=rank + 1, item_id=item_id_original, request_log_id=gen_img_row.request_log_id
-        )
-        db_session.add(rec_request)
-    db_session.commit()
-
     rec_results = []
-    for item_id in recommended_items_id:
+    for rank, item_id in enumerate(recommended_items_id):
         if len(rec_results) == 10:
             break
         article_info = article_id_to_info(item_id, p_label)
         if article_info:
             rec_results.append(article_info)
+
+            item_id_original = "0" + item_id
+            rec_request = LogRecommendation(
+                item_rank=rank + 1, item_id=item_id_original, request_log_id=gen_img_row.request_log_id
+            )
+            db_session.add(rec_request)
+
+    db_session.commit()
 
     return {
         "user_id": data.user_id,
