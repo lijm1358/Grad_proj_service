@@ -4,12 +4,19 @@ from typing import Annotated
 from database import get_session
 from fastapi import APIRouter, Depends
 from google.cloud.storage import Bucket
-from model import LogImggen, LogImggenRequest, LogRecommendation, LogUserItemInteraction, User
+from model import (
+    LogImggen,
+    LogImggenRequest,
+    LogRecommendation,
+    LogUserItemInteraction,
+    User,
+)
 from schemas import ImageGen, Interact, Recommend
 from service import (
     article_id_to_info,
     generate_embedding_from_image,
     generate_image_from_prompt,
+    predict_prompt_class,
     recommend_item_from_seqimg,
 )
 from sqlmodel import Session, select
@@ -71,12 +78,13 @@ def generate_image(
 def recommend_item(data: Recommend, db_session: Annotated[Session, Depends(get_session)]):
     gen_img_row = db_session.get(LogImggen, data.image_id)
     emb_url = gen_img_row.emb_location
+    prompt_res = predict_prompt_class(data.promt)
 
     user_db_id = db_session.exec(select(User).where(User.username == data.user_id)).one().id
     user_seq = db_session.exec(select(LogUserItemInteraction).where(LogUserItemInteraction.user_id == user_db_id))
     user_seq_ids = [seq.item_id for seq in user_seq]
 
-    recommended_items_id = recommend_item_from_seqimg(user_seq_ids, data.image_id, emb_url)
+    recommended_items_id, p_label = recommend_item_from_seqimg(user_seq_ids, data.image_id, emb_url, prompt_res)
 
     for rank, item_id in enumerate(recommended_items_id):
         item_id_original = "0" + item_id
@@ -86,7 +94,13 @@ def recommend_item(data: Recommend, db_session: Annotated[Session, Depends(get_s
         db_session.add(rec_request)
     db_session.commit()
 
-    rec_results = [article_id_to_info(item_id) for item_id in recommended_items_id]
+    rec_results = []
+    for item_id in recommended_items_id:
+        if len(rec_results) == 10:
+            break
+        article_info = article_id_to_info(item_id, p_label)
+        if article_info:
+            rec_results.append(article_info)
 
     return {
         "user_id": data.user_id,
