@@ -2,7 +2,7 @@ import os
 import posixpath
 import uuid
 from random import sample
-from typing import List
+from typing import List, Tuple
 
 import numpy as np
 import pandas as pd
@@ -11,7 +11,6 @@ import yaml
 from diffusers import DPMSolverMultistepScheduler, StableDiffusionPipeline
 from fashion_clip.fashion_clip import FashionCLIP
 from models.mlpbert import MLPBERT4Rec
-from sklearn.model_selection import train_test_split
 from transformers import CLIPModel, pipeline
 from utils import get_current_date_str, load_json
 
@@ -161,7 +160,7 @@ def __load_img_embedding(emb_url: str) -> torch.Tensor:
     return emb
 
 
-def recommend_item_from_seqimg(user_seq: List[str], image_id: str, emb_url: str, prompt_res: tuple):
+def recommend_item_from_seqimg(user_seq: List[str], image_id: str, emb_url: str, prompt_res: Tuple[str, float]):
     model = MLPBERT4Rec(
         **model_args,
         num_item=num_item,
@@ -226,9 +225,9 @@ def article_id_to_info(article_id, p_label):
     return 0
 
 
-def predict_prompt_class(prompt: str) -> str:
-
+def predict_prompt_class(prompt: str) -> Tuple[str, float]:
     classifier = pipeline(model=TEXT_MODEL_PATH)
-    label, score = classifier(prompt)[0]
+    out = classifier(prompt)
+    label, score = out[0].values()
 
     return label, score
