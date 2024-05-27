@@ -4,13 +4,7 @@ from typing import Annotated
 from database import get_session
 from fastapi import APIRouter, Depends
 from google.cloud.storage import Bucket
-from model import (
-    LogImggen,
-    LogImggenRequest,
-    LogRecommendation,
-    LogUserItemInteraction,
-    User,
-)
+from model import LogImggen, LogImggenRequest, LogRecommendation, LogUserItemInteraction, User
 from schemas import ImageGen, Interact, Recommend
 from service import (
     article_id_to_info,
@@ -78,7 +72,7 @@ def generate_image(
 def recommend_item(data: Recommend, db_session: Annotated[Session, Depends(get_session)]):
     gen_img_row = db_session.get(LogImggen, data.image_id)
     emb_url = gen_img_row.emb_location
-    prompt_res = predict_prompt_class(data.promt)
+    prompt_res = predict_prompt_class(data.prompt)
 
     user_db_id = db_session.exec(select(User).where(User.username == data.user_id)).one().id
     user_seq = db_session.exec(select(LogUserItemInteraction).where(LogUserItemInteraction.user_id == user_db_id))

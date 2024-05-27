@@ -18,9 +18,16 @@ class ImageGen(BaseModel):
 class Recommend(BaseModel):
     user_id: str
     image_id: str
+    prompt: str
 
     class Config:
-        json_schema_extra = {"example": {"user_id": "1234", "image_id": "id1"}}
+        json_schema_extra = {
+            "example": {
+                "user_id": "1234",
+                "image_id": "id1",
+                "prompt": "A white t-shirt with a blue collar and a red stripe",
+            }
+        }
 
 
 class Interact(BaseModel):
