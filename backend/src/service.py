@@ -187,7 +187,7 @@ def recommend_item_from_seqimg(user_seq: List[str], image_id: str, emb_url: str,
         logits = model(log_seqs=tokens, modal_emb=modal_emb, labels=labels)
 
     user_res = -logits[0, -1, 1:]
-    top_n = 2000 if p_score >= 0.8 else 10  # use category hint when it's score is lager then equal 0.8
+    top_n = 2000 if p_score >= 0.8 else 10  # use category hint when it's score is larger than equal 0.8
     p_label = p_label if p_score >= 0.8 else "no_class"
 
     recommended_idx = user_res.argsort()[:top_n].tolist()
