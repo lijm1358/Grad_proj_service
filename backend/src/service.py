@@ -2,7 +2,7 @@ import os
 import posixpath
 import uuid
 from random import sample
-from typing import List
+from typing import List, Tuple
 
 import numpy as np
 import pandas as pd
@@ -11,13 +11,15 @@ import yaml
 from diffusers import DPMSolverMultistepScheduler, StableDiffusionPipeline
 from fashion_clip.fashion_clip import FashionCLIP
 from models.mlpbert import MLPBERT4Rec
-from transformers import CLIPModel
+from transformers import CLIPModel, pipeline
 from utils import get_current_date_str, load_json
 
 BATCH_SIZE = 4
 WIDTH = 512
 HEIGHT = 512
 INFERENCE_STEP = 30
+TEXT_MODEL_PATH = "SLKpnu/text_clf"
+
 
 gen_img_save_path = os.environ["GEN_IMG_SAVE_PATH"]
 gen_emb_save_path = os.environ["GEN_EMB_SAVE_PATH"]
@@ -158,17 +160,14 @@ def __load_img_embedding(emb_url: str) -> torch.Tensor:
     return emb
 
 
-def recommend_item_from_seqimg(
-    user_seq: List[str],
-    image_id: str,
-    emb_url: str,
-):
+def recommend_item_from_seqimg(user_seq: List[str], image_id: str, emb_url: str, prompt_res: Tuple[str, float]):
     model = MLPBERT4Rec(
         **model_args,
         num_item=num_item,
         idx_groups=idx_groups,
         device=device,
     ).to(device)
+    p_label, p_score = prompt_res
     user_seq_idx = [item2idx[int(seq[1:])] for seq in user_seq]  # remove '0' from string item id and cast to int
 
     model_ckpt_path = os.environ["RECOMMENDER_MODEL_CKPT_PATH"]
@@ -188,25 +187,47 @@ def recommend_item_from_seqimg(
         logits = model(log_seqs=tokens, modal_emb=modal_emb, labels=labels)
 
     user_res = -logits[0, -1, 1:]
-    recommended_idx = user_res.argsort()[:10].tolist()
+    top_n = 2000 if p_score >= 0.8 else 10  # use category hint when it's score is larger than equal 0.8
+    p_label = p_label if p_score >= 0.8 else "no_class"
+
+    recommended_idx = user_res.argsort()[:top_n].tolist()
     recommended_idx = [str(idx2item[idx]) for idx in recommended_idx]
 
-    return recommended_idx
+    return recommended_idx, p_label
 
 
-def article_id_to_info(article_id):
+def article_id_to_info(article_id, p_label):
     real_id = "0" + article_id
     articles["article_id"]
     single_item = articles[articles["article_id"] == int(article_id)].squeeze()
     base_img_url = os.environ["GCP_ORIG_IMAGE_URL"]
     base_img_url += real_id[:3] + "/" + real_id + ".jpg"
 
-    infos = {
-        "article_id": str(single_item["article_id"]),
-        "prod_name": single_item["prod_name"],
-        "prod_type_name": single_item["product_type_name"],
-        "detail_desc": single_item["detail_desc"],
-        "image_link": base_img_url,
-    }
+    if p_label == "no_class":
+        infos = {
+            "article_id": str(single_item["article_id"]),
+            "prod_name": single_item["prod_name"],
+            "prod_type_name": single_item["product_type_name"],
+            "detail_desc": single_item["detail_desc"],
+            "image_link": base_img_url,
+        }
+        return infos
 
-    return infos
+    if p_label == single_item["garment_group_name"]:
+        infos = {
+            "article_id": str(single_item["article_id"]),
+            "prod_name": single_item["prod_name"],
+            "prod_type_name": single_item["product_type_name"],
+            "detail_desc": single_item["detail_desc"],
+            "image_link": base_img_url,
+        }
+        return infos
+    return 0
+
+
+def predict_prompt_class(prompt: str) -> Tuple[str, float]:
+    classifier = pipeline(model=TEXT_MODEL_PATH)
+    out = classifier(prompt)
+    label, score = out[0].values()
+
+    return label, score
